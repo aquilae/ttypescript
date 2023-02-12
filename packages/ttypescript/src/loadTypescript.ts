@@ -26,22 +26,35 @@ export function loadTypeScript(
     return patchCreateProgram(ts, forceConfigLoad);
 }
 
-type TypeScriptFactory = (exports: ts, require: NodeRequire, module: Module, filename: string, dirname: string) => void;
+type TypeScriptFactory = (exports: ts, require: NodeRequire, module: Module, module2: Module, filename: string, dirname: string) => void;
 const typeScriptFactoryCache = new Map<string, TypeScriptFactory>();
 
 function TSModuleFactory(filename: string) {
     let factory = typeScriptFactoryCache.get(filename);
     if (!factory) {
-        const code = readFileSync(filename, 'utf8');
-        factory = runInThisContext(`(function (exports, require, module, __filename, __dirname) {${code}\n});`, {
+        let code = readFileSync(filename, 'utf8');
+
+        code = [
+          code,
+          [
+            `Object.entries(module.exports).forEach(entry => {`,
+            `  module2.exports[entry[0]] = entry[1];`,
+            `});`,
+            ``,
+          ].join('\n'),
+        ].join('\n\n')
+
+        factory = runInThisContext(`(function (exports, require, module, module2, __filename, __dirname) {${code}\n});`, {
             filename: filename,
             lineOffset: 0,
             displayErrors: true,
         }) as TypeScriptFactory;
+
         typeScriptFactoryCache.set(filename, factory);
     }
 
     const newModule = new Module(filename, module);
-    factory.call(newModule, newModule.exports, require, newModule, filename, dirname(filename));
-    return newModule;
+    const newModule2 = new Module(filename, module);
+    factory.call(newModule, newModule.exports, require, newModule, newModule2, filename, dirname(filename));
+    return newModule2;
 }

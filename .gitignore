@@ -6,3 +6,8 @@ dist
 *.log
 .DS_STORE
 .vscode
+
+# yarn
+.yarn
+.yarnrc.yml
+yarn.lock

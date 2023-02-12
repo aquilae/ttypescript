@@ -1,13 +1,13 @@
 {
   "name": "ttypescript-build",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Over TypeScript tool to use custom transformers in the tsconfig.json",
   "private": true,
   "scripts": {
     "clean": "rm -rf packages/*/dist packages/*/lib",
     "clean.all": "lerna clean --yes && rm -rf package-lock.json packages/*/package-lock.json node_modules packages/*/lib packages/*/dist",
     "debug": "node --inspect-brk ./node_modules/jest/bin/jest --runInBand --no-cache --no-watchman",
-    "postinstall": "lerna bootstrap --hoist",
+    "//postinstall": "lerna bootstrap --hoist",
     "build": "lerna exec --scope=ttypescript -- tsc",
     "test": "npm run build && jest",
     "test.watch": "npm run build && jest --watch",
